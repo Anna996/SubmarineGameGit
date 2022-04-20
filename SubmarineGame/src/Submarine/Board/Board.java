@@ -19,6 +19,7 @@ public class Board {
 		initBoard();
 	}
 
+	//TODO  logic !!!
 	private void initBoard() {
 		for (int i = 0; i < ROWS; i++) {
 			for (int j = 0; j < COLS; j++) {
