@@ -1,5 +1,6 @@
 package Submarine.Game;
 
+import java.util.Random;
 import java.util.Scanner;
 
 import Submarine.Board.Board;
@@ -27,17 +28,21 @@ public class Game {
 	
 	public void play() {
 		Scanner scanner = new Scanner(System.in);
+		Random random = new Random();
 		int row , col;
 		
 		System.out.println("Playing...\n");
 		board.print();
 		
 		while(status == Status.PLAYING) {
-			System.out.print("Enter row: ");
-			row = scanner.nextInt();
-			System.out.print("Enter col: ");
-			col = scanner.nextInt();
-			updateScore(board.isMatch(row, col));
+//			System.out.print("Enter row: ");
+//			row = scanner.nextInt();
+//			System.out.print("Enter col: ");
+//			col = scanner.nextInt();
+			
+			row = random.nextInt(Board.ROWS);
+			col = random.nextInt(Board.COLS);
+			updateScore(board.makeMove(row, col));
 			updateStatus();
 		}
 		
