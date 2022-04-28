@@ -1,21 +1,32 @@
 package Submarine.Game;
 
-import java.util.Random;
-import java.util.Scanner;
-
 import Submarine.Board.Board;
 
 public class Game {
-	private Board board;
+	private Board logicBoard;
+	private Board userBoard;
 	private int numOfHits;
 	private int numOfMiss;
 	private Status status;
-	
+	private final int GUESSES = 100;
+	public final char HIT = 'H';
+	public final char MISS = '-';
+
 	public Game() {
-		board = new Board();
+		initLogicBoard();
+		initUserBoard();
 		setNumOfHits(0);
 		setNumOfHits(0);
 		status = Status.PLAYING;
+	}
+
+	private void initLogicBoard() {
+		logicBoard = new Board();
+		logicBoard.addRandomSubmarines();
+	}
+
+	private void initUserBoard() {
+		userBoard = new Board();
 	}
 
 	private void setNumOfHits(int numOfHits) {
@@ -24,47 +35,44 @@ public class Game {
 
 	private void setNumOfMiss(int numOfMiss) {
 		this.numOfMiss = numOfMiss;
-	}	
-	
-	public void play() {
-		Scanner scanner = new Scanner(System.in);
-		Random random = new Random();
-		int row , col;
-		
-		System.out.println("Playing...\n");
-		board.print();
-		
-		while(status == Status.PLAYING) {
-//			System.out.print("Enter row: ");
-//			row = scanner.nextInt();
-//			System.out.print("Enter col: ");
-//			col = scanner.nextInt();
-			
-			row = random.nextInt(Board.ROWS);
-			col = random.nextInt(Board.COLS);
-			updateScore(board.makeMove(row, col));
-			updateStatus();
-		}
-		
-		System.out.println("You " + status + " !");
 	}
-	
+
+	public Status getStatus() {
+		return status;
+	}
+
+	public void playNext(int row, int col) {
+		char resultVal;
+
+		resultVal = logicBoard.getValueAt(row, col) == logicBoard.getSubmarinePattern() ? HIT : MISS;
+		userBoard.setValueAt(row, col, resultVal);
+		updateScore(resultVal);
+		updateStatus();
+	}
+
+	private void updateScore(char resultVal) {
+		if (resultVal == HIT) {
+			setNumOfHits(numOfHits + 1);
+		} else {
+			setNumOfMiss(numOfMiss + 1);
+		}
+	}
+
 	private void updateStatus() {
-		if(numOfHits + numOfMiss == 100) {
+		if (numOfHits + numOfMiss == GUESSES) {
 			this.status = numOfHits > numOfMiss ? Status.WON : Status.LOST;
 		}
 	}
 
-	private void updateScore(boolean isMatch) {
-		if(isMatch) {
-			setNumOfHits(numOfHits + 1);
-		}
-		else {
-			setNumOfMiss(numOfMiss + 1);
-		}
+	public void printLogicBoard() {
+		logicBoard.print();
 	}
-	
-	public enum Status{
+
+	public void printUserBoard() {
+		userBoard.print();
+	}
+
+	public enum Status {
 		PLAYING, WON, LOST
 	}
 }

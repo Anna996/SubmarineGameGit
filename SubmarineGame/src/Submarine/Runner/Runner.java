@@ -1,10 +1,10 @@
 package Submarine.Runner;
 
-import Submarine.Game.Game;
+import Submarine.Gui.Gui;
 
 public class Runner {
 	public static void main(String[] args) {
-		Game game = new Game();
-		game.play();
+		Gui submarineGui = new Gui();
+		submarineGui.startGame();
 	}
 }
