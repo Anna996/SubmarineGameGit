@@ -4,7 +4,7 @@ public class Submarine {
 	private int[] rows;
 	private int[] cols;
 	private int index;
-	public static final char PATTERN = '*';
+	public static final char PATTERN = 'B';
 
 	public Submarine(int size) {
 		rows = new int[size];

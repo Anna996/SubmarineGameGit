@@ -37,6 +37,7 @@ public class Board {
 			size = 1 + random.nextInt(MAX_SIZE_OF_SUBMARINE);
 			submarines[i] = createSubmarine(size);
 			addSubmarine(submarines[i]);
+			System.out.printf("size of submarine %d: %d \n", i + 1, size);
 		}
 	}
 
@@ -48,35 +49,169 @@ public class Board {
 		for (int i = 0; i < size; i++) {
 			setValueAt(rows[i], cols[i], Submarine.PATTERN);
 		}
+
+		for (int i = 0; i < size; i++) {
+			addNotAvailablePatternsFor(rows[i], cols[i]);
+		}
 	}
 
-	// TODO LOGIC: find available place for submarine
+	// TODO add exceptions
+	private void addNotAvailablePatternsFor(int row, int col) {
+		int[] square;
+
+		square = getUp(row, col);
+		addNotAvailablePatternAt(square);
+		square = getDown(row, col);
+		addNotAvailablePatternAt(square);
+		square = getRight(row, col);
+		addNotAvailablePatternAt(square);
+		square = getLeft(row, col);
+		addNotAvailablePatternAt(square);
+	}
+
+	private void addNotAvailablePatternAt(int[] square) {
+		int row = square[0], col = square[1];
+
+		if (isAvailableSquare(row, col)) {
+			setValueAt(row, col, NOT_AVAILABLE);
+		}
+	}
+
 	private Submarine createSubmarine(int size) {
-		Submarine submarine = new Submarine(size);
 		int row, col;
-		boolean foundPlace;
-		
+		Boolean isFoundAll = false;
+		int[][] arrOfFounded = new int[size][];
+
 		do {
-			foundPlace=true;
 			row = random.nextInt(ROWS);
 			col = random.nextInt(COLS);
-			while(isAvailableSquare(row, col)) {
-				
+			if (isAvailableSquare(row, col)) {
+				int[] square = new int[] { row, col };
+				arrOfFounded[0] = square;
+				isFoundAll = findAvailableSquares(row, col, 1, size, arrOfFounded);
 			}
-		}while(foundPlace);
+		} while (!isFoundAll);
 
-		
-//		for (int i = 0; i < size; i++) {
-//			row = random.nextInt(ROWS);
-//			col = random.nextInt(COLS);
-//			submarine.addData(row, col);
-//		}
+		return createSubmarine(arrOfFounded);
+	}
+
+	private Submarine createSubmarine(int[][] arrOfFounded) {
+		Submarine submarine = new Submarine(arrOfFounded.length);
+
+		for (int[] square : arrOfFounded) {
+			submarine.addData(square[0], square[1]);
+		}
 
 		return submarine;
 	}
-	
+
+	private boolean findAvailableSquares(int row, int col, int numOfFound, int size, int[][] arrOfFounded) {
+		if (numOfFound == size) {
+			return true;
+		}
+
+		int[][] arrOfAvailable = new int[4][];
+		int numOfNeighbors = addAllAvailableNeighbors(row, col, arrOfAvailable, arrOfFounded);
+		int[] unChecked = new int[numOfNeighbors];
+		for (int i = 0; i < numOfNeighbors; i++) {
+			unChecked[i] = i;
+		}
+
+		Random random = new Random();
+		int unCheckedIdx;
+		for (int i = 0; i < numOfNeighbors; i++) {
+			unCheckedIdx = random.nextInt(unChecked.length);
+			int[] neighbor = arrOfAvailable[unChecked[unCheckedIdx]];
+			arrOfFounded[numOfFound] = neighbor;
+			boolean isFoundAll = findAvailableSquares(neighbor[0], neighbor[1], numOfFound + 1, size, arrOfFounded);
+			if (isFoundAll) {
+				return true;
+			}
+			unChecked = deleteIndex(unChecked, unCheckedIdx);
+		}
+		return false;
+	}
+
+	/**
+	 * Adds all available neighbors of this current square (represented with
+	 * (row,col) ), but ignores the neighbors that had already found and in
+	 * arrOfFounded.
+	 * 
+	 * @param row            the row of the current square.
+	 * @param col            the col of the current square.
+	 * @param arrOfAvailable array that contains all the available neighbors.
+	 * @param arrOfFounded   array of all founded squares until now.
+	 * @return the number of neighbors that was added to arrOfAvailable.
+	 */
+	private int addAllAvailableNeighbors(int row, int col, int[][] arrOfAvailable, int[][] arrOfFounded) {
+		int[] neighbor;
+		int index;
+
+		neighbor = getUp(row, col);
+		index = addNeighborIfAvailable(neighbor, arrOfAvailable, 0, arrOfFounded);
+		neighbor = getDown(row, col);
+		index = addNeighborIfAvailable(neighbor, arrOfAvailable, index, arrOfFounded);
+		neighbor = getLeft(row, col);
+		index = addNeighborIfAvailable(neighbor, arrOfAvailable, index, arrOfFounded);
+		neighbor = getRight(row, col);
+		index = addNeighborIfAvailable(neighbor, arrOfAvailable, index, arrOfFounded);
+
+		return index;
+	}
+
+	private int[] deleteIndex(int[] arr, int index) {
+		int[] updated = new int[arr.length - 1];
+		int updatedIdx = 0, arrIdx = 0;
+
+		while (updatedIdx < updated.length) {
+			if (updatedIdx != index) {
+				updated[updatedIdx++] = arr[arrIdx];
+			}
+			arrIdx++;
+		}
+
+		return updated;
+	}
+
+	private int addNeighborIfAvailable(int[] neighbor, int[][] arrOfAvailable, int index, int[][] arrOfFounded) {
+		for (int[] ignoreSquare : arrOfFounded) {
+			if (ignoreSquare == null)
+				break;
+			if (neighbor[0] == ignoreSquare[0] && neighbor[1] == ignoreSquare[1])
+				return index;
+		}
+
+		if (isAvailableSquare(neighbor)) {
+			arrOfAvailable[index] = new int[2];
+			arrOfAvailable[index][0] = neighbor[0];
+			arrOfAvailable[index][1] = neighbor[1];
+			index++;
+		}
+		return index;
+	}
+
+	private boolean isAvailableSquare(int[] square) {
+		return isAvailableSquare(square[0], square[1]);
+	}
+
 	private boolean isAvailableSquare(int row, int col) {
 		return getValueAt(row, col) == EMPTY;
+	}
+
+	private int[] getUp(int row, int col) {
+		return new int[] { row - 1, col };
+	}
+
+	private int[] getDown(int row, int col) {
+		return new int[] { row + 1, col };
+	}
+
+	private int[] getLeft(int row, int col) {
+		return new int[] { row, col - 1 };
+	}
+
+	private int[] getRight(int row, int col) {
+		return new int[] { row, col + 1 };
 	}
 
 	public void print() {
