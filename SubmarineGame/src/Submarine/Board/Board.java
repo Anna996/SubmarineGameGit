@@ -2,12 +2,15 @@ package Submarine.Board;
 
 import java.util.Random;
 
+import Exceptions.OutOfBoardException;
+import Exceptions.OutOfTargetsException;
 import Submarine.Submarine.Submarine;
 
 public class Board {
 	private char[][] matrix;
 	private Submarine[] submarines;
 	private Random random;
+	private int numOfPatternsToDiscover;
 	public final char EMPTY = ' ';
 	public final char NOT_AVAILABLE = '+';
 	public static final int ROWS = 10;
@@ -17,7 +20,6 @@ public class Board {
 
 	public Board() {
 		matrix = new char[ROWS][COLS];
-		submarines = new Submarine[NUM_OF_SUBMARINES];
 		initBoard();
 	}
 
@@ -29,16 +31,29 @@ public class Board {
 		}
 	}
 
+	private void setNumOfPatternsToDiscover(int numOfPatternsToDiscover) {
+		this.numOfPatternsToDiscover = numOfPatternsToDiscover;
+	}
+
+	public void foundOnePattern() throws OutOfTargetsException {
+		setNumOfPatternsToDiscover(numOfPatternsToDiscover - 1);
+		if (numOfPatternsToDiscover == 0)
+			throw new OutOfTargetsException();
+	}
+
 	public void addRandomSubmarines() {
 		random = new Random();
-		int size;
+		int size, numOfPatternsToDiscover = 0;
 
+		submarines = new Submarine[NUM_OF_SUBMARINES];
 		for (int i = 0; i < NUM_OF_SUBMARINES; i++) {
 			size = 1 + random.nextInt(MAX_SIZE_OF_SUBMARINE);
 			submarines[i] = createSubmarine(size);
 			addSubmarine(submarines[i]);
-			System.out.printf("size of submarine %d: %d \n", i + 1, size);
+			numOfPatternsToDiscover += size;
 		}
+
+		setNumOfPatternsToDiscover(numOfPatternsToDiscover);
 	}
 
 	private void addSubmarine(Submarine submarine) {
@@ -55,7 +70,6 @@ public class Board {
 		}
 	}
 
-	// TODO add exceptions
 	private void addNotAvailablePatternsFor(int row, int col) {
 		int[] square;
 
@@ -194,8 +208,12 @@ public class Board {
 		return isAvailableSquare(square[0], square[1]);
 	}
 
-	private boolean isAvailableSquare(int row, int col) {
-		return getValueAt(row, col) == EMPTY;
+	public boolean isAvailableSquare(int row, int col) {
+		try {
+			return getValueAt(row, col) == EMPTY;
+		} catch (OutOfBoardException e) {
+			return false;
+		}
 	}
 
 	private int[] getUp(int row, int col) {
@@ -238,17 +256,26 @@ public class Board {
 		}
 	}
 
-	// TODO Exception setValueAt
 	public void setValueAt(int row, int col, char val) {
 		matrix[row][col] = val;
 	}
 
-	// TODO Exception getValueAt
-	public char getValueAt(int row, int col) {
+	public char getValueAt(int row, int col) throws OutOfBoardException {
+		validSquareIndexes(row, col);
 		return matrix[row][col];
 	}
 
 	public char getSubmarinePattern() {
 		return Submarine.PATTERN;
+	}
+
+	private void validSquareIndexes(int row, int col) throws OutOfBoardException {
+		validIndex(row, ROWS, "Row");
+		validIndex(col, COLS, "Col");
+	}
+
+	private void validIndex(int index, int max, String nameOfIndex) throws OutOfBoardException {
+		if (index < 0 || index >= max)
+			throw new OutOfBoardException(nameOfIndex + " must be between 0 and " + (max - 1));
 	}
 }

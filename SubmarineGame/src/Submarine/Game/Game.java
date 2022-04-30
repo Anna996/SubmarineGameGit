@@ -1,5 +1,8 @@
 package Submarine.Game;
 
+import Exceptions.ChooseOnlyOnceException;
+import Exceptions.OutOfBoardException;
+import Exceptions.OutOfTargetsException;
 import Submarine.Board.Board;
 
 public class Game {
@@ -7,6 +10,8 @@ public class Game {
 	private Board userBoard;
 	private int numOfHits;
 	private int numOfMiss;
+	private int score;
+	private boolean consecutiveHit;
 	private Status status;
 	private final int GUESSES = 100;
 	public final char HIT = 'H';
@@ -17,6 +22,8 @@ public class Game {
 		initUserBoard();
 		setNumOfHits(0);
 		setNumOfHits(0);
+		setScore(1000);
+		setConsecutiveHit(false);
 		status = Status.PLAYING;
 	}
 
@@ -37,29 +44,60 @@ public class Game {
 		this.numOfMiss = numOfMiss;
 	}
 
+	private void setScore(int score) {
+		this.score = score;
+	}
+	
+	private void setConsecutiveHit(boolean consecutiveHit) {
+		this.consecutiveHit = consecutiveHit;
+	}
+
+	private boolean isConsecutiveHit() {
+		return consecutiveHit;
+	}
+
 	public Status getStatus() {
 		return status;
 	}
 
-	public void playNext(int row, int col) {
+	public void playNext(int row, int col) throws OutOfBoardException, ChooseOnlyOnceException {
 		char resultVal;
 
 		resultVal = logicBoard.getValueAt(row, col) == logicBoard.getSubmarinePattern() ? HIT : MISS;
+		if(!userBoard.isAvailableSquare(row, col)) {
+			throw new ChooseOnlyOnceException();
+		}
+		
 		userBoard.setValueAt(row, col, resultVal);
-		updateScore(resultVal);
+		try {
+			updateScore(resultVal);
+		} catch (OutOfTargetsException e) {
+			System.out.println(e.getMessage());
+			this.status = Status.WON;
+			return;
+		}
 		updateStatus();
 	}
 
-	private void updateScore(char resultVal) {
+	private void updateScore(char resultVal) throws OutOfTargetsException {
+		int score;
+		
 		if (resultVal == HIT) {
 			setNumOfHits(numOfHits + 1);
+			score = isConsecutiveHit() ? 1000 : 200;
+			setConsecutiveHit(true);
+			logicBoard.foundOnePattern();
+			
 		} else {
 			setNumOfMiss(numOfMiss + 1);
+			setConsecutiveHit(false);
+			score = -10;
 		}
+		setScore(this.score + score);
 	}
 
 	private void updateStatus() {
-		if (numOfHits + numOfMiss == GUESSES) {
+		if (numOfHits + numOfMiss == GUESSES || score <= 0) {
 			this.status = numOfHits > numOfMiss ? Status.WON : Status.LOST;
 		}
 	}
@@ -70,6 +108,14 @@ public class Game {
 
 	public void printUserBoard() {
 		userBoard.print();
+	}
+
+	public int getNumOfTriesPlayerDid() {
+		return numOfHits + numOfMiss;
+	}
+	
+	public void printCurrentInfo() {
+		System.out.printf("Score: %d , #hits: %d , #misses: %d\n", score, numOfHits, numOfMiss);
 	}
 
 	public enum Status {

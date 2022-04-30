@@ -13,11 +13,6 @@ public class Submarine {
 	}
 
 	public void addData(int row, int col) {
-		if(index == rows.length) {
-			// TODO Exception for Submarine class addData
-			System.out.println("Overflow!");
-			return;
-		}
 		rows[index] = row;
 		cols[index] = col;
 		index++;
@@ -30,7 +25,7 @@ public class Submarine {
 	public int[] getCols() {
 		return cols;
 	}
-	
+
 	public int getSize() {
 		return rows.length;
 	}
