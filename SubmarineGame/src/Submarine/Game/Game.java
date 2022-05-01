@@ -13,7 +13,7 @@ public class Game {
 	private int score;
 	private boolean consecutiveHit;
 	private Status status;
-	private final int GUESSES = 100;
+	public static final int GUESSES = 100;
 	public final char HIT = 'H';
 	public final char MISS = '-';
 
@@ -25,6 +25,11 @@ public class Game {
 		setScore(1000);
 		setConsecutiveHit(false);
 		status = Status.PLAYING;
+	}
+	
+	public Game(Board logicBoard) {
+		this();
+		this.logicBoard = logicBoard;
 	}
 
 	private void initLogicBoard() {
@@ -58,6 +63,10 @@ public class Game {
 
 	public Status getStatus() {
 		return status;
+	}
+	
+	public Board getLogicBoard() {
+		return logicBoard;
 	}
 
 	public void playNext(int row, int col) throws OutOfBoardException, ChooseOnlyOnceException {
