@@ -1,12 +1,17 @@
 package Submarine.Board;
 
+import java.io.Serializable;
 import java.util.Random;
 
 import Exceptions.OutOfBoardException;
 import Exceptions.OutOfTargetsException;
 import Submarine.Submarine.Submarine;
 
-public class Board {
+public class Board implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4088873713912415739L;
 	private char[][] matrix;
 	private Submarine[] submarines;
 	private Random random;

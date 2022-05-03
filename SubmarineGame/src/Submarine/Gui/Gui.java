@@ -17,7 +17,6 @@ public class Gui {
 	private Game game;
 	private Scanner scanner;
 	private Player player;
-	private Records infoRecord;
 
 	public void startGame() {
 		scanner = new Scanner(System.in);
@@ -27,7 +26,7 @@ public class Gui {
 		play();
 		printGameResult();
 		recordInforamtion();
-//		infoRecord.printFile();
+//		Records.printFile();
 		scanner.close();
 	}
 
@@ -38,7 +37,7 @@ public class Gui {
 	private void initGame(Board logicBoard) {
 		game = new Game(logicBoard);
 	}
-	
+
 	private void initPlayer() {
 //		System.out.print("Enter your name: ");
 //		String name = scanner.next();
@@ -53,8 +52,7 @@ public class Gui {
 	}
 
 	private void recordInforamtion() {
-		infoRecord = new Records();
-		infoRecord.record(player, "Player status: " + game.getStatus());
+		Records.record(player, "Player status: " + game.getStatus(), game.getLogicBoard());
 	}
 
 	private void printTitle() {
@@ -126,16 +124,16 @@ public class Gui {
 		System.out.println("You " + game.getStatus() + " !");
 	}
 
-	public void replay() {
-		int row , col;
-		
-		initGame(game.getLogicBoard());
+	public void replayLastGame() {
+		int row, col;
+
+		initGame(Records.getLogicBoard());
 		printNewLine();
 		System.out.println("replay...");
-		for (Guess guess : infoRecord.getRecordedGuesses()) {
+		for (Guess guess : Records.getRecordedGuesses()) {
 			row = guess.getX();
 			col = guess.getY();
-			
+
 			delay();
 			printNewLine();
 			game.printCurrentInfo();
@@ -146,17 +144,18 @@ public class Gui {
 				System.out.println(e);
 			}
 			printNewLine();
-			System.out.printf("Your choise: ( %d , %d )\n", row , col);
+			System.out.printf("Your choise: ( %d , %d )\n", row, col);
 		}
-		
+
 		printNewLine();
 		game.printCurrentInfo();
 		game.printUserBoard();
 		System.out.println("End Of Replay.");
 	}
-	
+
 	private void delay() {
 		LocalTime soon = LocalTime.now().plusSeconds(3);
-		while(LocalTime.now().isBefore(soon)) {}
+		while (LocalTime.now().isBefore(soon)) {
+		}
 	}
 }

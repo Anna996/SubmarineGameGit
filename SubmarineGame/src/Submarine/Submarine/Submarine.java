@@ -1,6 +1,12 @@
 package Submarine.Submarine;
 
-public class Submarine {
+import java.io.Serializable;
+
+public class Submarine implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6759272276820844200L;
 	private int[] rows;
 	private int[] cols;
 	private int index;
