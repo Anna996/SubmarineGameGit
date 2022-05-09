@@ -1,5 +1,6 @@
 package Submarine.Record;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -11,10 +12,23 @@ import Submarine.Player.Guess;
 import Submarine.Player.Player;
 
 public class Records {
+	private static String prefix;
+	private static String suffix;
+	
+	static {
+		prefix ="files/record_info_";
+		suffix = ".txt";
+	}
+	
 
-	public static void record(Player player, String info, Board logicBoard) {
+	private static String getFileName(int recordNum) {
+		return prefix + recordNum + suffix;
+	}
+	
+	public static void record(int recordNum, Player player, String info, Board logicBoard) {
+		String fileName = getFileName(recordNum);
 
-		try (FileOutputStream file = new FileOutputStream("files/record_info.txt");
+		try (FileOutputStream file = new FileOutputStream(fileName);
 				ObjectOutputStream output = new ObjectOutputStream(file)) {
 
 			output.writeObject(player);
@@ -25,8 +39,10 @@ public class Records {
 		}
 	}
 
-	public static void printFile() {
-		try (FileInputStream file = new FileInputStream("files/record_info.txt");
+	public static void printFile(int recordNum) {
+		String fileName = getFileName(recordNum);
+		
+		try (FileInputStream file = new FileInputStream(fileName);
 				ObjectInputStream input = new ObjectInputStream(file)) {
 
 			System.out.println(input.readObject());
@@ -38,30 +54,53 @@ public class Records {
 		}
 	}
 
-	public static Guess[] getRecordedGuesses() {
-		try (FileInputStream file = new FileInputStream("files/record_info.txt");
+	public static Player getRecordedPlayer(int recordNum) {
+		String fileName = getFileName(recordNum);
+		
+		try (FileInputStream file = new FileInputStream(fileName);
 				ObjectInputStream input = new ObjectInputStream(file)) {
 
-			Player player = (Player) input.readObject();
-			return player.getGuesses();
-			
+			return (Player) input.readObject();
+
 		} catch (IOException | ClassNotFoundException e) {
 			System.out.println(e);
 			return null;
 		}
 	}
 	
-	public static Board getLogicBoard() {
-		try (FileInputStream file = new FileInputStream("files/record_info.txt");
+	public static Guess[] getRecordedGuesses(int recordNum) {
+		String fileName = getFileName(recordNum);
+		
+		try (FileInputStream file = new FileInputStream(fileName);
 				ObjectInputStream input = new ObjectInputStream(file)) {
 
-			input.readObject();
-			input.readObject();
-			return (Board)input.readObject();
-			
+			Player player = (Player) input.readObject();
+			return player.getGuesses();
+
 		} catch (IOException | ClassNotFoundException e) {
 			System.out.println(e);
 			return null;
 		}
+	}
+
+	public static Board getLogicBoard(int recordNum) {
+		String fileName = getFileName(recordNum);
+		
+		try (FileInputStream file = new FileInputStream(fileName);
+				ObjectInputStream input = new ObjectInputStream(file)) {
+
+			input.readObject();
+			input.readObject();
+			return (Board) input.readObject();
+
+		} catch (IOException | ClassNotFoundException e) {
+			System.out.println(e);
+			return null;
+		}
+	}
+
+	public static int getNumOfFiles() {
+		File files = new File("files");
+		return files.list().length;
 	}
 }

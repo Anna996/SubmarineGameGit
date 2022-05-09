@@ -48,6 +48,10 @@ public class Player implements Serializable{
 	public void setGuesses(Guess[] guesses) {
 		this.guesses = guesses;
 	}
+	
+	public void printPlayerInfo() {
+		System.out.println("Player info:\nname: " + name + "\nemail: " + email + "\nphoneNumber: " + phoneNumber);
+	}
 
 	@Override
 	public String toString() {

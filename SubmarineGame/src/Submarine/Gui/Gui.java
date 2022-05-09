@@ -17,17 +17,20 @@ public class Gui {
 	private Game game;
 	private Scanner scanner;
 	private Player player;
+	private static int gameCounter = 0;
+
+	public Gui(Scanner scanner) {
+		gameCounter++;
+		this.scanner = scanner;
+	}
 
 	public void startGame() {
-		scanner = new Scanner(System.in);
 		initGame();
 		printTitle();
 		initPlayer();
 		play();
 		printGameResult();
 		recordInforamtion();
-//		Records.printFile();
-		scanner.close();
 	}
 
 	private void initGame() {
@@ -45,14 +48,14 @@ public class Gui {
 //		String email = scanner.next();
 //		System.out.print("Enter your phoneNumber: ");
 //		String phoneNumber = scanner.next();
-//		
+//
 //		player = new Player(name, email, phoneNumber);
 
 		player = new Player("anna", "annaaba15@gmail.com", "0545225947");
 	}
 
 	private void recordInforamtion() {
-		Records.record(player, "Player status: " + game.getStatus(), game.getLogicBoard());
+		Records.record(gameCounter, player, "Player status: " + game.getStatus(), game.getLogicBoard());
 	}
 
 	private void printTitle() {
@@ -124,13 +127,15 @@ public class Gui {
 		System.out.println("You " + game.getStatus() + " !");
 	}
 
-	public void replayLastGame() {
+	private void replayGame(int recordNum) {
 		int row, col;
 
-		initGame(Records.getLogicBoard());
+		initGame(Records.getLogicBoard(recordNum));
+		printNewLine();
+		Records.getRecordedPlayer(recordNum).printPlayerInfo();
 		printNewLine();
 		System.out.println("replay...");
-		for (Guess guess : Records.getRecordedGuesses()) {
+		for (Guess guess : Records.getRecordedGuesses(recordNum)) {
 			row = guess.getX();
 			col = guess.getY();
 
@@ -151,6 +156,13 @@ public class Gui {
 		game.printCurrentInfo();
 		game.printUserBoard();
 		System.out.println("End Of Replay.");
+	}
+
+	public void replay() {
+		System.out.println("\n========= REPLAY =========");
+		System.out.print("You have " + Records.getNumOfFiles() + " recordings.\nEnter the number of record: ");
+		int input = scanner.nextInt();
+		replayGame(input);
 	}
 
 	private void delay() {
